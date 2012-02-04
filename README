@@ -6,3 +6,4 @@ Dependencies:
 	GTK+ 2.24
 	PyGTK 2.24
 	imagescanner (http://code.google.com/p/imagescanner/)
+	twain (Windows; http://pypi.python.org/pypi/twain)
