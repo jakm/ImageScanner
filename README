@@ -1,0 +1,8 @@
+Description:
+	Simple PyGTK scanning utility
+
+Dependencies:
+	Python 2.7
+	GTK+ 2.24
+	PyGTK 2.24
+	imagescanner (http://code.google.com/p/imagescanner/)
