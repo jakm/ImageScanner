@@ -64,6 +64,7 @@ class ImageScanner(object):
             if target_dir == None:
                 self.__show_error('Vyberte cílový adresář.')
                 return
+            target_dir = target_dir.decode('utf8')
             
             image = self.__scan_image(scanner, dpi)
             self.__store_image(target_dir, image, form)
