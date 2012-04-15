@@ -8,16 +8,17 @@ import gobject
 
 from datetime import datetime
 import os.path
+import sys
 
 import imagescanner
-from imagescanner.backends.twain import twain as _twain
+import imagescanner.events
+
+if sys.platform in ('win32', 'cygwin'):
+    from imagescanner.backends.twain import twain as _twain
 
 # imagescanner setup
 imagescanner.settings.ENABLE_NET_BACKEND = False
 imagescanner.settings.ENABLE_TEST_BACKEND = False
-
-# replace base twain backend
-imagescanner.core._imagescanner.NT_BACKEND = 'TwainDecorator'
 
 class ImageScanner(object):
     def __init__(self):
@@ -119,25 +120,16 @@ class ImageScanner(object):
         return image
 
     def __set_scanner_settings(self, scanner, dpi):
-        rgbCap = lambda scanner: scanner.SetCapability( \
-                       _twain.ICAP_PIXELTYPE, \
-                       _twain.TWTY_UINT16, \
-                       _twain.TWPT_RGB)
-##        dpiXCap = lambda scanner: scanner.SetCapability( \
-##                       _twain.ICAP_XRESOLUTION, \
-##                       _twain.TWTY_FIX32, \
-##                       float(dpi))
-##        dpiYCap = lambda scanner: scanner.SetCapability( \
-##                       _twain.ICAP_YRESOLUTION, \
-##                       _twain.TWTY_FIX32, \
-##                       float(dpi))
-        
-        scanner._scan_before_event.append(rgbCap)
-##        scanner._scan_before_event.append(dpiXCap)
-##        scanner._scan_before_event.append(dpiYCap)
+        if sys.platform in ('win32', 'cygwin'):
+            def set_capability(ea):
+                dev = ea.event_data # scanner device
+                dev.SetCapability(_twain.ICAP_PIXELTYPE, _twain.TWTY_UINT16, _twain.TWPT_RGB)
+            
+            scanner.bind(imagescanner.events.SCAN_BEFORE_EVENT, set_capability)
 
     def __remove_scanner_settings(self, scanner):
-        scanner._scan_before_event = scanner._scan_before_event[:-3]
+        if sys.platform in ('win32', 'cygwin'):
+            scanner.unbind(imagescanner.events.SCAN_BEFORE_EVENT)
     
     def __store_image(self, target_dir, image, img_format):
         path = self.__build_path(target_dir, img_format)
