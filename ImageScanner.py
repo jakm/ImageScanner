@@ -124,11 +124,16 @@ class ImageScanner(object):
             def set_capability(ea):
                 dev = ea.event_data # scanner device
                 dev.SetCapability(_twain.ICAP_PIXELTYPE, _twain.TWTY_UINT16, _twain.TWPT_RGB)
-            
+        elif sys.platform in ('linux2'):
+            def set_capability(ea):
+                dev = ea.event_data # scanner device
+                dev.resolution = int(dpi)
+        
+        if set_capability:
             scanner.bind(imagescanner.events.SCAN_BEFORE_EVENT, set_capability)
 
     def __remove_scanner_settings(self, scanner):
-        if sys.platform in ('win32', 'cygwin'):
+        if sys.platform in ('win32', 'cygwin', 'linux2'):
             scanner.unbind(imagescanner.events.SCAN_BEFORE_EVENT)
     
     def __store_image(self, target_dir, image, img_format):
